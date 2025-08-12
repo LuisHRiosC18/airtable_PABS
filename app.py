@@ -16,4 +16,5 @@ st.markdown(
     - Métricas del trabajo realizado por los reclutadores. 🦾🦾🦾
     - Comparativas entre los distintos equipos de reclutadores. 🫂🫂🫂
     - Pruebas de Hipotesis que comparan el desempeño a comparación del desempeño historico. ⚖️⚖️⚖️
+    """
 )
