@@ -84,17 +84,3 @@ if not df.empty and 'Aceptados' in df.columns:
 else:
     st.warning("No se pudieron cargar los datos o falta la columna 'Aceptados' para mostrar el KPI mensual.")
 
-            fig_line = go.Figure()
-            fig_line.add_trace(go.Scatter(
-                x=historical_sunday_pubs.index,
-                y=historical_sunday_pubs.values,
-                mode='lines+markers',
-                name='Publicaciones'
-            ))
-            fig_line.update_layout(
-                title="Tendencia de Publicaciones en Domingos",
-                xaxis_title="Fecha",
-                yaxis_title="Número de Publicaciones",
-                height=350
-            )
-            st.plotly_chart(fig_line, use_container_width=True)
