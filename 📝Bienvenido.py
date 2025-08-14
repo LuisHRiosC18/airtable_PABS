@@ -66,7 +66,7 @@ if not df.empty and 'Aceptados' in df.columns:
     if monthly_accepted.empty:
         st.warning("No hay datos de 'Aceptados' para mostrar.")
     else:
-        fig = go.Figure(go.area(
+        fig = go.Figure(go.Lines(
             x=monthly_accepted['Mes'],
             y=monthly_accepted['Aceptados'],
             text=monthly_accepted['Aceptados'],
