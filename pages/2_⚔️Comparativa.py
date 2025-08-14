@@ -100,7 +100,7 @@ if not df.empty:
         st.warning(f"No se encontraron datos para el periodo '{time_range}'.")
     else:
         st.header(f"Comparativa General de '{metric_to_compare}' por Equipo ({time_range})")
-        team_results = [{"Equipo": f"{name} (Gerente: {data['manager']})", "Total": comparison_df[comparison_df['Reclutador'].isin(data['members'])][metric_to_compare].sum()} for name, data in TEAMS_CONFIG.items()]
+        team_results = [{"Equipo": f"{name}", "Total": comparison_df[comparison_df['Reclutador'].isin(data['members'])][metric_to_compare].sum()} for name, data in TEAMS_CONFIG.items()]
         results_df = pd.DataFrame(team_results)
 
         fig = go.Figure(go.Bar(x=results_df['Equipo'], y=results_df['Total'], text=results_df['Total'], textposition='auto', marker_color='royalblue'))
