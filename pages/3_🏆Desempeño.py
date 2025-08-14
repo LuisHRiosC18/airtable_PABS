@@ -88,7 +88,8 @@ if not df.empty:
     if grouped_data.empty:
         st.warning(f"No hay datos para el {analysis_period} seleccionado.")
     else:
-        st.markdown(f"Se muestra el **total de métricas** para cada reclutador en el periodo seleccionado. La evaluación (emoji) compara este total con el rendimiento histórico.")
+        st.markdown(f"Aquí se muestra el **total de métricas** para cada reclutador en el periodo seleccionado. Se realiza una comparación del desempeño semanal o mensual con el desempeño deseado por medio de una prueba de hipotesis. Si el desempeño es adecuado al lado de la metrica de conteo se presentará el emoji
+        🙂, si el desemepeño es medio el emoji es: 😐. En caso de un desempeño mediocre se mostrará: 😠")
         metric_columns = ['Publicaciones', 'Contactos', 'Citas', 'Entrevistas', 'Aceptados']
         
         results_list = []
@@ -109,7 +110,7 @@ if not df.empty:
         # --- SECCIÓN DE GRÁFICOS DE RADAR (SOLO PARA VISTA SEMANAL) ---
         if analysis_period == "Semana":
             st.divider()
-            st.header("Análisis del Embudo de Reclutamiento de la Semana")
+            st.header("Análisis de estadísticas de los Reclutadores por semana")
             
             weekly_summary = period_df.groupby('Reclutador').sum(numeric_only=True)
             if not weekly_summary.empty:
@@ -129,7 +130,7 @@ if not df.empty:
                     with cols[i % 3]:
                         values = weekly_summary.loc[recruiter_name, conversion_metrics].values
                         fig_radar = go.Figure(go.Scatterpolar(r=values, theta=conversion_labels, fill='toself', name=recruiter_name))
-                        fig_radar.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100])), showlegend=False, title=f"Embudo de {recruiter_name}", height=400)
+                        fig_radar.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100])), showlegend=False, title=f"Fortalezas de {recruiter_name}", height=400)
                         st.plotly_chart(fig_radar, use_container_width=True)
             else:
                 st.info("No hay suficientes datos en esta semana para generar los gráficos de embudo.")
