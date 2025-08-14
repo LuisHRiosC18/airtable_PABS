@@ -155,11 +155,13 @@ if not df.empty:
                 height=350
             )
             st.plotly_chart(fig_line, use_container_width=True)
+            
+        # --- NUEVA SECCIÓN: DESGLOSE POR RECLUTADOR ---
+        st.divider()
+        st.subheader(f"Desglose por Reclutador - {selected_sunday.strftime('%d/%m/%Y')}")
 
-    st.divider()
-    st.subheader(f"Publicaciones por reclutador domingo {selected_sunday.strftime('%d/%m/%Y')")
-    
-    sunday_detail_df = sunday_df[
+        # Filtrar datos para el domingo seleccionado y que tengan publicaciones
+        sunday_detail_df = sunday_df[
             (sunday_df['Fecha'].dt.date == selected_sunday) &
             (sunday_df['Publicaciones'] > 0)
         ][['Reclutador', 'Publicaciones']]
@@ -179,6 +181,7 @@ if not df.empty:
 
 else:
     st.error("No se pudieron cargar los datos. Revisa la conexión y la configuración.")
+
 
 
 
