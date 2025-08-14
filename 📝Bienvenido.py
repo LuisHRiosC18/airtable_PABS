@@ -66,23 +66,35 @@ if not df.empty and 'Aceptados' in df.columns:
     if monthly_accepted.empty:
         st.warning("No hay datos de 'Aceptados' para mostrar.")
     else:
-        fig = go.Figure(go.Bar(
-            x=monthly_accepted['Mes'],
-            y=monthly_accepted['Aceptados'],
-            text=monthly_accepted['Aceptados'],
-            textposition='auto',
-            marker_color='indigo'
-        ))
+        fig_line = go.Figure()
+        fig_line.add_trace(go.Scatter(
+                x=monthly_accepted['Mes'],
+                y=monthly_accepted['Aceptados',
+                mode='lines+markers',
+                name='Aceptados'
+            ))
         
-        fig.update_layout(
-            title="Total de Candidatos Aceptados Mensualmente",
-            xaxis_title="Mes",
-            yaxis_title="Número de Aceptados",
-            xaxis={'type': 'category'},
-            height=450
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        fig_line.update_layout(
+                title="Tendencia de Publicaciones en Domingos",
+                xaxis_title="Fecha",
+                yaxis_title="Número de Publicaciones",
+                height=350
+            )
+        st.plotly_chart(fig_line, use_container_width=True)
 else:
     st.warning("No se pudieron cargar los datos o falta la columna 'Aceptados' para mostrar el KPI mensual.")
 
-
+            fig_line = go.Figure()
+            fig_line.add_trace(go.Scatter(
+                x=historical_sunday_pubs.index,
+                y=historical_sunday_pubs.values,
+                mode='lines+markers',
+                name='Publicaciones'
+            ))
+            fig_line.update_layout(
+                title="Tendencia de Publicaciones en Domingos",
+                xaxis_title="Fecha",
+                yaxis_title="Número de Publicaciones",
+                height=350
+            )
+            st.plotly_chart(fig_line, use_container_width=True)
