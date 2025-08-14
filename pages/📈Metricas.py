@@ -83,8 +83,7 @@ if not df.empty:
     else:
         df_filtered = df.copy()
 
-    # --- DEFINICIÓN DE METAS ---
-    daily_goals = {'Publicaciones': 5, 'Contactos': 20, 'Citas': 5, 'Entrevistas': 2, 'Aceptados': 1}
+    daily_goals = {'Publicaciones': 30, 'Contactos': 25, 'Citas': 2, 'Entrevistas': 1, 'Aceptados': 1}
 
     # --- PESTAÑAS PARA VISTAS (DÍA, SEMANA, MES) ---
     tab_day, tab_week, tab_month = st.tabs(["Análisis del Día", "Análisis Semanal", "Análisis Mensual"])
@@ -257,3 +256,4 @@ if not df.empty:
 
 else:
     st.error("No se pudieron cargar los datos. Revisa la configuración y la conexión.")
+
