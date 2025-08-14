@@ -156,5 +156,29 @@ if not df.empty:
             )
             st.plotly_chart(fig_line, use_container_width=True)
 
+    st.divider()
+    st.subheader(f"Publicaciones por reclutador domingo {selected_sunday.strftime('%d/%m/%Y')")
+    
+    sunday_detail_df = sunday_df[
+            (sunday_df['Fecha'].dt.date == selected_sunday) &
+            (sunday_df['Publicaciones'] > 0)
+        ][['Reclutador', 'Publicaciones']]
+
+        if sunday_detail_df.empty:
+            st.info("Ningún reclutador realizó publicaciones en el domingo seleccionado.")
+        else:
+            num_recruiters_posted = len(sunday_detail_df)
+            # Usar hasta 5 columnas para que no se vea muy apretado
+            cols = st.columns(min(num_recruiters_posted, 5)) 
+            
+            for i, row in enumerate(sunday_detail_df.itertuples()):
+                # El operador % (módulo) asegura que si hay más de 5 reclutadores,
+                # se reutilicen las columnas, creando una nueva fila visual.
+                with cols[i % 5]:
+                    st.metric(label=row.Reclutador, value=int(row.Publicaciones))
+
 else:
     st.error("No se pudieron cargar los datos. Revisa la conexión y la configuración.")
+
+
+
