@@ -6,6 +6,16 @@ from datetime import datetime, timedelta
 from pyairtable import Api
 import numpy as np
 
+st.set_page_config(
+    page_title="Comparativa entre equipos",
+    page_icon="📊",
+    layout="wide"
+)
+
+st.title("⚔️ Comparativas equipos de Reclutamiento")
+st.markdown("Comparativa entre los equipos de reclutamiento para que gerencia pueda tomar decisiones y ver el desempeño de su equipo.")
+
+
 TEAMS_CONFIG = {
     "Equipo Jeanneth": {
         "manager": "Jeanneth",
@@ -109,8 +119,8 @@ if not df.empty:
 
         st.divider()
         
-        # --- NUEVA SECCIÓN: DESGLOSE POR EQUIPO ---
-        st.header("Desglose de Rendimiento por Miembro del Equipo")
+        # Graficar por equipo a chuparla 
+        st.header("Rendimiento por Miembros del Equipo")
         
         num_teams = len(TEAMS_CONFIG)
         cols = st.columns(num_teams)
