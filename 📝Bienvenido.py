@@ -49,38 +49,38 @@ st.divider()
 
 # KPI ACEPTADOS a chuparla guaarrrrrra 
 
-st.header("KPI Histórico: Total de Aceptados por Mes")
+#st.header("KPI Histórico: Total de Aceptados por Mes")
 
-df = load_data_from_airtable()
+#df = load_data_from_airtable()
 
-if not df.empty and 'Aceptados' in df.columns:
+#if not df.empty and 'Aceptados' in df.columns:
     # Asegurarse de que no haya fechas nulas
-    df.dropna(subset=['Fecha'], inplace=True)
+#    df.dropna(subset=['Fecha'], inplace=True)
     
     # Crear una columna con el formato 'Año-Mes' para agrupar
-    df['Mes'] = df['Fecha'].dt.to_period('M').astype(str)
+ #   df['Mes'] = df['Fecha'].dt.to_period('M').astype(str)
     
     #Agrupamos por número de aceptados y sumamos perrrrrro
-    monthly_accepted = df.groupby('Mes')['Aceptados'].sum().reset_index()
+  #  monthly_accepted = df.groupby('Mes')['Aceptados'].sum().reset_index()
     
-    if monthly_accepted.empty:
-        st.warning("No hay datos de 'Aceptados' para mostrar.")
-    else:
-        fig_line = go.Figure()
-        fig_line.add_trace(go.Scatter(
-                x=monthly_accepted['Mes'],
-                y=monthly_accepted['Aceptados'],
-                mode='lines+markers',
-                name='Aceptados'
-            ))
+   # if monthly_accepted.empty:
+    #    st.warning("No hay datos de 'Aceptados' para mostrar.")
+#    else:
+ #       fig_line = go.Figure()
+  #      fig_line.add_trace(go.Scatter(
+   #             x=monthly_accepted['Mes'],
+    #            y=monthly_accepted['Aceptados'],
+     #           mode='lines+markers',
+      #          name='Aceptados'
+       #     ))
         
-        fig_line.update_layout(
-                title="Tendencia de Publicaciones en Domingos",
-                xaxis_title="Fecha",
-                yaxis_title="Número de Publicaciones",
-                height=350
-            )
-        st.plotly_chart(fig_line, use_container_width=True)
-else:
-    st.warning("No se pudieron cargar los datos o falta la columna 'Aceptados' para mostrar el KPI mensual.")
+       # fig_line.update_layout(
+        #        title="Tendencia de Publicaciones en Domingos",
+         #       xaxis_title="Fecha",
+         #       yaxis_title="Número de Publicaciones",
+          #      height=350
+           # )
+        #st.plotly_chart(fig_line, use_container_width=True)
+#else:
+ #   st.warning("No se pudieron cargar los datos o falta la columna 'Aceptados' para mostrar el KPI mensual.")
 
