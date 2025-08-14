@@ -1,4 +1,9 @@
 import streamlit as st
+import pandas as pd
+import plotly.graph_objects as go
+from datetime import datetime, timedelta
+from pyairtable import Api
+import numpy as np
 
 # Función para cargar datos
 @st.cache_data(ttl=43200)
