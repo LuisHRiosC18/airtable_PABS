@@ -69,7 +69,7 @@ if not df.empty and 'Aceptados' in df.columns:
         fig_line = go.Figure()
         fig_line.add_trace(go.Scatter(
                 x=monthly_accepted['Mes'],
-                y=monthly_accepted['Aceptados',
+                y=monthly_accepted['Aceptados'],
                 mode='lines+markers',
                 name='Aceptados'
             ))
