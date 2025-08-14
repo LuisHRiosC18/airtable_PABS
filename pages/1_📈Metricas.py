@@ -51,6 +51,15 @@ if not df.empty:
     
     df_filtered = df if selected_recruiter == "Todos" else df[df['Reclutador'] == selected_recruiter].copy()
 
+    # --- CORRECCIÓN: Definir metric_labels en un alcance superior ---
+    metric_labels = {
+        'Publicaciones': 'Publicaciones', 
+        'Contactos': 'Contactados', 
+        'Citas': 'Citados', 
+        'Entrevistas': 'Entrevistados', 
+        'Aceptados': 'Aceptados'
+    }
+
     st.header("Análisis Semanal (Jueves a Miércoles)")
     selected_date_week = st.date_input("Selecciona una fecha para ver su semana", datetime.now().date(), key="weekly_date_selector")
     
@@ -63,7 +72,6 @@ if not df.empty:
         st.warning("No hay datos para el reclutador y la semana seleccionados.")
     else:
         weekly_summary = weekly_data.sum(numeric_only=True)
-        metric_labels = {'Publicaciones': 'Publicaciones', 'Contactos': 'Contactados', 'Citas': 'Citados', 'Entrevistas': 'Entrevistados', 'Aceptados': 'Aceptados'}
         cols = st.columns(len(metric_labels))
         for i, (metric, label) in enumerate(metric_labels.items()):
             cols[i].metric(label=label, value=f"{int(weekly_summary.get(metric, 0))}")
@@ -80,6 +88,7 @@ if not df.empty:
     else:
         cumulative_kpis = weekly_kpis.cumsum()
         
+        # Ahora esta línea funcionará siempre
         kpi_cols = st.columns(len(metric_labels))
         for i, (metric, label) in enumerate(metric_labels.items()):
             with kpi_cols[i]:
