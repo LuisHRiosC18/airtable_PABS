@@ -104,7 +104,7 @@ if not df.empty:
         results_df = pd.DataFrame(team_results)
 
         fig = go.Figure(go.Bar(x=results_df['Equipo'], y=results_df['Total'], text=results_df['Total'], textposition='auto', marker_color='royalblue'))
-        fig.update_layout(title=f"Total de {metric_to_compare} por Equipo", xaxis_title="Equipos y Gerentes", yaxis_title=f"Total de {metric_to_compare}", height=500)
+        fig.update_layout(title=f"Total de {metric_to_compare} por Equipo", xaxis_title="Equipos", yaxis_title=f"Total de {metric_to_compare}", height=500)
         st.plotly_chart(fig, use_container_width=True)
 
         st.divider()
