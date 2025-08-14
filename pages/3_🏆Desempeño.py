@@ -88,8 +88,7 @@ if not df.empty:
     if grouped_data.empty:
         st.warning(f"No hay datos para el {analysis_period} seleccionado.")
     else:
-        st.markdown(f"Aquí se muestra el **total de métricas** para cada reclutador en el periodo seleccionado. Se realiza una comparación del desempeño semanal o mensual con el desempeño deseado por medio de una prueba de hipotesis. Si el desempeño es adecuado al lado de la metrica de conteo se presentará el emoji
-        🙂, si el desemepeño es medio el emoji es: 😐. En caso de un desempeño mediocre se mostrará: 😠")
+        st.markdown(f"Aquí se muestra el **total de métricas** para cada reclutador en el periodo seleccionado. Se realiza una comparación del desempeño semanal o mensual con el desempeño deseado por medio de una prueba de hipotesis.")
         metric_columns = ['Publicaciones', 'Contactos', 'Citas', 'Entrevistas', 'Aceptados']
         
         results_list = []
