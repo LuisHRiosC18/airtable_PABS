@@ -57,34 +57,34 @@ if not df.empty:
     col1, col2, col3= st.columns([1, 1, 1])
 
         #Primer columna para el gauge jeje equis de
-        with col1:
-            fig = go.Figure(go.Indicator(
-            mode = "gauge+number",
-            value = df_filtered['Publicaciones'].sum(),
-            title = {'text': "Publicaciones"}))
-            st.plotly_chart(fig, use_container_width=True)
+    with col1:
+        fig = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = df_filtered['Publicaciones'].sum(),
+        title = {'text': "Publicaciones"}))
+        st.plotly_chart(fig, use_container_width=True)
 
 
 
-        with col2:
+    with col2:
             # GRÁFICO DE LÍNEAS HISTÓRICO
-            historical_sunday_pubs = sunday_df.groupby(sunday_df['Fecha'].dt.date)['Publicaciones'].sum().sort_index()
-            fig_line = go.Figure()
-            fig_line.add_trace(go.Scatter(
-                x=historical_sunday_pubs.index,
-                y=historical_sunday_pubs.values,
-                mode='lines+markers',
-                name='Publicaciones'
-            ))
-            fig_line.update_layout(
-                title="Tendencia de Publicaciones en Domingos",
-                xaxis_title="Fecha",
-                yaxis_title="Número de Publicaciones",
-                height=350
-            )
-            st.plotly_chart(fig_line, use_container_width=True)
+        historical_sunday_pubs = sunday_df.groupby(sunday_df['Fecha'].dt.date)['Publicaciones'].sum().sort_index()
+        fig_line = go.Figure()
+        fig_line.add_trace(go.Scatter(
+        x=historical_sunday_pubs.index,
+        y=historical_sunday_pubs.values,
+        mode='lines+markers',
+        name='Publicaciones'
+        ))
+        fig_line.update_layout(
+            title="Tendencia de Publicaciones en Domingos",
+            xaxis_title="Fecha",
+            yaxis_title="Número de Publicaciones",
+            height=350
+        )
+        st.plotly_chart(fig_line, use_container_width=True)
             
-        st.divider()
+    st.divider()
     
 
 ##Estoy muriendoooo
