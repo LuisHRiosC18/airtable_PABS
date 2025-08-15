@@ -36,6 +36,8 @@ def get_thursday_week_range(date_obj):
 
 st.set_page_config(page_title="Métricas Diarias", page_icon="📈", layout="wide")
 st.title("📈 Métricas y desempeño diario")
+st.subheader(f"Visualiza el desempeño diario del departamento de reclutamiento.")
+
 
 df = load_data_from_airtable()
 
@@ -55,6 +57,7 @@ if not df.empty:
     }
 
     col1, col2, col3= st.columns([1, 1, 1])
+    col4, col5 = st.columns([2,2])
 
         #Primer columna para el gauge jeje equis de
     with col1:
@@ -64,12 +67,6 @@ if not df.empty:
         title = {'text': "Publicaciones"}))
         st.plotly_chart(fig, use_container_width=True)
         
-        fig4 = go.Figure(go.Indicator(
-        mode = "gauge+number",
-        value = df_filtered['Entrevistas'].sum(),
-        title = {'text': "Acudieron a la cita"}))
-        st.plotly_chart(fig4, use_container_width=True)
-
     with col2:
         fig = go.Figure(go.Indicator(
         mode = "gauge+number",
@@ -84,11 +81,21 @@ if not df.empty:
         title = {'text': "Citados"}))
         st.plotly_chart(fig, use_container_width=True)
 
+    with col4:
+        fig4 = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = df_filtered['Entrevistas'].sum(),
+        title = {'text': "Acudieron a la cita"}))
+        st.plotly_chart(fig4, use_container_width=True)
+
+    with col5:
         fig5 = go.Figure(go.Indicator(
         mode = "gauge+number",
         value = df_filtered['Aceptados'].sum(),
         title = {'text': "Aceptados"}))
         st.plotly_chart(fig5, use_container_width=True)
+
+    
 
     
     st.divider()
