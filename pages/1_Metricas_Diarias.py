@@ -59,11 +59,21 @@ if not df.empty:
     tabs1, tabs2, tabs3 = st.tabs(["☝️🤓 Diario", "☝️🤓 Semanal", "☝️🤓 Mensual"])
 
     with tabs1:
-        st.header("Malvadoso")
+        st.header("Metricas diarias")
+        col1, col2, col3= st.columns([1, 1, 1])
+        col4, col5 = st.columns([2,2])
+    
+    
+    
     with tabs2:
-        st.header("Prueba")
+        st.header("Metricas de la semana (Jueves a Miércoles9")
+        col1, col2, col3= st.columns([1, 1, 1])
+        col4, col5 = st.columns([2,2])
+    
+    
+    
     with tabs3:
-        st.header("Artimaña")
+        st.header("Metricas del mes")
 
         
         col1, col2, col3= st.columns([1, 1, 1])
