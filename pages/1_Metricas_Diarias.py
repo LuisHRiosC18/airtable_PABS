@@ -54,13 +54,13 @@ if not df.empty:
         'Aceptados': 'Aceptados'
     }
 
-fig = go.Figure(go.Indicator(
-    mode = "gauge+number",
-    value = df_filtered['Publicaciones'].sum(),
-    domain = {'x': [0, 1], 'y': [0, 1]},
-    title = {'text': "Publicaciones"}))
+    fig = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = df_filtered['Publicaciones'].sum(),
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        title = {'text': "Publicaciones"}))
 
-fig.show()
+    fig.show()
 
 ##Estoy muriendoooo
 
