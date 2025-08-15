@@ -56,8 +56,18 @@ if not df.empty:
         'Aceptados': 'Aceptados'
     }
 
-    col1, col2, col3= st.columns([1, 1, 1])
-    col4, col5 = st.columns([2,2])
+    tabs1, tabs2, tabs3 = st.tabs(["☝️🤓 Diario", "☝️🤓 Semanal", "☝️🤓 Mensual"])
+
+    with tab1:
+        st.header("Tetas de hamster")
+    with tab2:
+        st.header("Prueba")
+    with tab3:
+        st.header("Artimaña")
+
+        
+        col1, col2, col3= st.columns([1, 1, 1])
+        col4, col5 = st.columns([2,2])
 
         #Primer columna para el gauge jeje equis de
     with col1:
