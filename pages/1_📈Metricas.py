@@ -3,10 +3,6 @@ import pandas as pd
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
-# Se asume una función de carga en utils.py
-# from utils import load_data_from_airtable 
-
-# --- INICIO: Función de carga (copiar a utils.py o mantener aquí) ---
 @st.cache_data(ttl=43200)
 def load_data_from_airtable():
     from pyairtable import Api
@@ -30,7 +26,6 @@ def load_data_from_airtable():
     except Exception as e:
         st.error(f"Error al cargar datos: {e}")
         return pd.DataFrame()
-# --- FIN: Función de carga ---
 
 def get_thursday_week_range(date_obj):
     """Calcula el inicio de la semana (Jueves) para una fecha dada."""
@@ -51,7 +46,6 @@ if not df.empty:
     
     df_filtered = df if selected_recruiter == "Todos" else df[df['Reclutador'] == selected_recruiter].copy()
 
-    # --- CORRECCIÓN: Definir metric_labels en un alcance superior ---
     metric_labels = {
         'Publicaciones': 'Publicaciones', 
         'Contactos': 'Contactados', 
@@ -74,7 +68,7 @@ if not df.empty:
         weekly_summary = weekly_data.sum(numeric_only=True)
         cols = st.columns(len(metric_labels))
         for i, (metric, label) in enumerate(metric_labels.items()):
-            cols[i].metric(label=label, value=f"{int(weekly_summary.get(metric, 0))}")
+            cols[i].metric(label=label, value=f"{int(weekly_summary.get(metric, 0))}", border= True)
 
     st.divider()
 
@@ -181,6 +175,7 @@ if not df.empty:
 
 else:
     st.error("No se pudieron cargar los datos. Revisa la conexión y la configuración.")
+
 
 
 
