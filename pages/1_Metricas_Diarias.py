@@ -63,27 +63,34 @@ if not df.empty:
         value = df_filtered['Publicaciones'].sum(),
         title = {'text': "Publicaciones"}))
         st.plotly_chart(fig, use_container_width=True)
-
-
+        
+        fig4 = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = df_filtered['Entrevistas'].sum(),
+        title = {'text': "Acudieron a la cita"}))
+        st.plotly_chart(fig4, use_container_width=True)
 
     with col2:
-            # GRÁFICO DE LÍNEAS HISTÓRICO
-        historical_sunday_pubs = sunday_df.groupby(sunday_df['Fecha'].dt.date)['Publicaciones'].sum().sort_index()
-        fig_line = go.Figure()
-        fig_line.add_trace(go.Scatter(
-        x=historical_sunday_pubs.index,
-        y=historical_sunday_pubs.values,
-        mode='lines+markers',
-        name='Publicaciones'
-        ))
-        fig_line.update_layout(
-            title="Tendencia de Publicaciones en Domingos",
-            xaxis_title="Fecha",
-            yaxis_title="Número de Publicaciones",
-            height=350
-        )
-        st.plotly_chart(fig_line, use_container_width=True)
-            
+        fig = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = df_filtered['Contactos'].sum(),
+        title = {'text': "Contactados"}))
+        st.plotly_chart(fig, use_container_width=True)
+
+    with col3:
+        fig = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = df_filtered['Citas'].sum(),
+        title = {'text': "Citados"}))
+        st.plotly_chart(fig, use_container_width=True)
+
+        fig5 = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = df_filtered['Aceptados'].sum(),
+        title = {'text': "Aceptados"}))
+        st.plotly_chart(fig5, use_container_width=True)
+
+    
     st.divider()
     
 
