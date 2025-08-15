@@ -39,6 +39,34 @@ st.title("📈 Métricas y desempeño diario")
 
 df = load_data_from_airtable()
 
+if not df.empty:
+    st.sidebar.header("Filtrar por")
+    recruiters = sorted(df['Reclutador'].unique())
+    selected_recruiter = st.sidebar.selectbox("Selecciona un Reclutador", ["Todos"] + recruiters)
+    
+    df_filtered = df if selected_recruiter == "Todos" else df[df['Reclutador'] == selected_recruiter].copy()
+
+    metric_labels = {
+        'Publicaciones': 'Publicaciones', 
+        'Contactos': 'Contactados', 
+        'Citas': 'Citados', 
+        'Entrevistas': 'Entrevistados', 
+        'Aceptados': 'Aceptados'
+    }
+
+fig = go.Figure(go.Indicator(
+    mode = "gauge+number",
+    value = df_filtered.groupby('Reclutador')['Publicaciones'].sum(),
+    domain = {'x': [0, 1], 'y': [0, 1]},
+    title = {'text': "Publicaciones"}))
+
+fig.show()
+
+##Estoy muriendoooo
+
+
+
+
 
 
 
