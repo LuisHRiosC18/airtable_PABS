@@ -61,7 +61,6 @@ if not df.empty:
             fig = go.Figure(go.Indicator(
             mode = "gauge+number",
             value = df_filtered['Publicaciones'].sum(),
-            domain = {'x': [0, 1], 'y': [0, 1]},
             title = {'text': "Publicaciones"}))
             st.plotly_chart(fig, use_container_width=True)
 
