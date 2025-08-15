@@ -59,7 +59,7 @@ if not df.empty:
     tabs1, tabs2, tabs3 = st.tabs(["☝️🤓 Diario", "☝️🤓 Semanal", "☝️🤓 Mensual"])
 
     with tabs1:
-        st.header("Tetas de hamster")
+        st.header("Malvadoso")
     with tabs2:
         st.header("Prueba")
     with tabs3:
