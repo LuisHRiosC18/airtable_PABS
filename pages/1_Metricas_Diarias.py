@@ -69,6 +69,125 @@ if not df.empty:
         st.header("Metricas de la semana (Jueves a Miércoles9")
         col1, col2, col3= st.columns([1, 1, 1])
         col4, col5 = st.columns([2,2])
+
+        st.header("Análisis Semanal (Jueves a Miércoles)")
+        selected_date_week = st.date_input("Selecciona una fecha para ver su semana", datetime.now().date(), key="weekly_date_selector")
+    
+        start_of_week, end_of_week = get_thursday_week_range(selected_date_week), get_thursday_week_range(selected_date_week) + timedelta(days=6)
+        st.info(f"Mostrando datos del **Jueves, {start_of_week.strftime('%d/%m/%Y')}** al **Miércoles, {end_of_week.strftime('%d/%m/%Y')}**")
+
+        weekly_data = df_filtered[(df_filtered['Fecha'].dt.date >= start_of_week) & (df_filtered['Fecha'].dt.date <= end_of_week)]
+    
+        if weekly_data.empty:
+            st.warning("No hay datos para el reclutador y la semana seleccionados.")
+        else:
+            weekly_summary = weekly_data.sum(numeric_only=True)
+            cols = st.columns(len(metric_labels))
+            for i, (metric, label) in enumerate(metric_labels.items()):
+                cols[i].metric(label=label, value=f"{int(weekly_summary.get(metric, 0))}", border= True)
+
+        st.divider()
+
+    # --- NUEVA SECCIÓN: GRÁFICOS DE ACUMULADO KPI ---
+        st.header("KPIs Acumulados por Semana")
+        df_filtered['Week_Start'] = df_filtered['Fecha'].apply(get_thursday_week_range)
+        weekly_kpis = df_filtered.groupby('Week_Start').sum(numeric_only=True).sort_index()
+    
+        if weekly_kpis.empty:
+            st.warning("No hay suficientes datos históricos para mostrar KPIs acumulados.")
+        else:
+            cumulative_kpis = weekly_kpis.cumsum()
+        
+        # Ahora esta línea funcionará siempre
+            kpi_cols = st.columns(len(metric_labels))
+            for i, (metric, label) in enumerate(metric_labels.items()):
+                with kpi_cols[i]:
+                    fig = go.Figure()
+                    fig.add_trace(go.Scatter(
+                        x=cumulative_kpis.index, 
+                        y=cumulative_kpis[metric], 
+                        fill='tozeroy', 
+                        mode='lines',
+                        name=label
+                    ))
+                    fig.update_layout(
+                        title=f"Acumulado de {label}",
+                        height=300,
+                        margin=dict(l=20, r=20, t=40, b=20),
+                        xaxis_title=None,
+                        yaxis_title="Total"
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+
+        st.divider()
+
+    # --- SECCIÓN ACTUALIZADA: PUBLICACIONES DEL DOMINGO ---
+        st.header("Análisis de Publicaciones en Domingo")
+    
+        sunday_df = df[df['Fecha'].dt.weekday == 6].copy() # 6 es Domingo
+    
+        if sunday_df.empty:
+            st.warning("No se han registrado publicaciones en ningún domingo.")
+        else:
+            sunday_df.sort_values('Fecha', ascending=False, inplace=True)
+            available_sundays = sunday_df['Fecha'].dt.date.unique()
+        
+            selected_sunday = st.selectbox(
+                "Selecciona un domingo para ver el detalle:",
+                options=available_sundays,
+                format_func=lambda date: date.strftime('%d de %B, %Y')
+            )
+        
+            col1, col2 = st.columns([1, 2])
+
+            with col1:
+            # INDICADOR GRANDE
+                total_pubs_sunday = sunday_df[sunday_df['Fecha'].dt.date == selected_sunday]['Publicaciones'].sum()
+                st.metric(
+                label=f"Total de Publicaciones del Domingo {selected_sunday.strftime('%d/%m/%Y')}",
+                value=int(total_pubs_sunday)
+                )
+
+            with col2:
+            # GRÁFICO DE LÍNEAS HISTÓRICO
+                historical_sunday_pubs = sunday_df.groupby(sunday_df['Fecha'].dt.date)['Publicaciones'].sum().sort_index()
+                fig_line = go.Figure()
+                fig_line.add_trace(go.Scatter(
+                    x=historical_sunday_pubs.index,
+                    y=historical_sunday_pubs.values,
+                    mode='lines+markers',
+                    name='Publicaciones'
+                ))
+                fig_line.update_layout(
+                    title="Tendencia de Publicaciones en Domingos",
+                    xaxis_title="Fecha",
+                    yaxis_title="Número de Publicaciones",
+                    height=350
+                )
+                st.plotly_chart(fig_line, use_container_width=True)
+            
+        # --- NUEVA SECCIÓN: DESGLOSE POR RECLUTADOR ---
+            st.divider()
+            st.subheader(f"Desglose por Reclutador - {selected_sunday.strftime('%d/%m/%Y')}")
+
+        # Filtrar datos para el domingo seleccionado y que tengan publicaciones
+            sunday_detail_df = sunday_df[
+                (sunday_df['Fecha'].dt.date == selected_sunday) &
+                (sunday_df['Publicaciones'] > 0)
+            ][['Reclutador', 'Publicaciones']]
+
+            if sunday_detail_df.empty:
+                st.info("Ningún reclutador realizó publicaciones en el domingo seleccionado.")
+            else:
+                num_recruiters_posted = len(sunday_detail_df)
+            # Usar hasta 5 columnas para que no se vea muy apretado
+                cols = st.columns(min(num_recruiters_posted, 5)) 
+            
+                for i, row in enumerate(sunday_detail_df.itertuples()):
+                # El operador % (módulo) asegura que si hay más de 5 reclutadores,
+                # se reutilicen las columnas, creando una nueva fila visual.
+                    with cols[i % 5]:
+                        st.metric(label=row.Reclutador, value=int(row.Publicaciones))
     
     
     
@@ -120,7 +239,9 @@ if not df.empty:
     
     st.divider()
     
-
+else:
+        st.error("No se pudieron cargar los datos. Revisa la conexión y la configuración.")
+    
 ##Estoy muriendoooo
 
 
