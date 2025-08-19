@@ -1,9 +1,9 @@
-
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
+# --- INICIO: Función de carga (copiar a utils.py o mantener aquí) ---
 @st.cache_data(ttl=43200)
 def load_data_from_airtable():
     from pyairtable import Api
@@ -21,12 +21,12 @@ def load_data_from_airtable():
             df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0)
         if 'Reclutador' in df.columns:
             df['Reclutador'] = df['Reclutador'].str.strip()
-        # Eliminar filas donde la fecha no se pudo convertir
         df.dropna(subset=['Fecha'], inplace=True)
         return df
     except Exception as e:
         st.error(f"Error al cargar datos: {e}")
         return pd.DataFrame()
+# --- FIN: Función de carga ---
 
 def get_thursday_week_range(date_obj):
     """Calcula el inicio de la semana (Jueves) para una fecha dada."""
@@ -34,15 +34,15 @@ def get_thursday_week_range(date_obj):
     start_of_week = date_obj - timedelta(days=days_since_thursday)
     return start_of_week
 
-st.set_page_config(page_title="Métricas Diarias", page_icon="📈", layout="wide")
-st.title("📈 Métricas y desempeño diario")
-st.subheader(f"Visualiza el desempeño diario del departamento de reclutamiento.")
-
+# --- CONFIGURACIÓN DE LA PÁGINA ---
+st.set_page_config(page_title="Métricas de Reclutamiento", page_icon="📈", layout="wide")
+st.title("📈 Métricas y Desempeño")
+st.subheader("Visualiza el desempeño del departamento de reclutamiento por periodo.")
 
 df = load_data_from_airtable()
 
 if not df.empty:
-    st.sidebar.header("Filtrar por")
+    st.sidebar.header("Filtros Principales")
     recruiters = sorted(df['Reclutador'].unique())
     selected_recruiter = st.sidebar.selectbox("Selecciona un Reclutador", ["Todos"] + recruiters)
     
@@ -56,194 +56,157 @@ if not df.empty:
         'Aceptados': 'Aceptados'
     }
 
-    tabs1, tabs2, tabs3 = st.tabs(["☝️🤓 Diario", "☝️🤓 Semanal", "☝️🤓 Mensual"])
+    # --- CREACIÓN DE PESTAÑAS ---
+    tab_daily, tab_weekly, tab_monthly, tab_sunday = st.tabs(["Diario ☝️🤓", "Semanal ☝️🤓", "Mensual ☝️🤓", "Análisis de Domingos ☝️🤓"])
 
-    with tabs1:
-        st.header("Metricas diarias")
-        col1, col2, col3= st.columns([1, 1, 1])
-        col4, col5 = st.columns([2,2])
-    
-    
-    
-    with tabs2:
-        st.header("Metricas de la semana (Jueves a Miércoles9")
-        col1, col2, col3= st.columns([1, 1, 1])
-        col4, col5 = st.columns([2,2])
+    # --- PESTAÑA DIARIA ---
+    with tab_daily:
+        st.header("Métricas del Día")
+        selected_date_daily = st.date_input("Selecciona un día", datetime.now().date(), key="daily_date_selector")
+        
+        daily_data = df_filtered[df_filtered['Fecha'].dt.date == selected_date_daily]
+        
+        if daily_data.empty:
+            st.warning("No hay datos para el reclutador y el día seleccionados.")
+        else:
+            daily_summary = daily_data.sum(numeric_only=True)
+            cols = st.columns(len(metric_labels))
+            for i, (metric, label) in enumerate(metric_labels.items()):
+                with cols[i]:
+                    fig = go.Figure(go.Indicator(
+                        mode="gauge+number",
+                        value=daily_summary.get(metric, 0),
+                        title={'text': label}
+                    ))
+                    fig.update_layout(height=250, margin=dict(l=20, r=20, t=50, b=20))
+                    st.plotly_chart(fig, use_container_width=True)
 
+    # --- PESTAÑA SEMANAL ---
+    with tab_weekly:
         st.header("Análisis Semanal (Jueves a Miércoles)")
         selected_date_week = st.date_input("Selecciona una fecha para ver su semana", datetime.now().date(), key="weekly_date_selector")
-    
+        
         start_of_week, end_of_week = get_thursday_week_range(selected_date_week), get_thursday_week_range(selected_date_week) + timedelta(days=6)
         st.info(f"Mostrando datos del **Jueves, {start_of_week.strftime('%d/%m/%Y')}** al **Miércoles, {end_of_week.strftime('%d/%m/%Y')}**")
 
         weekly_data = df_filtered[(df_filtered['Fecha'].dt.date >= start_of_week) & (df_filtered['Fecha'].dt.date <= end_of_week)]
-    
+        
         if weekly_data.empty:
             st.warning("No hay datos para el reclutador y la semana seleccionados.")
         else:
             weekly_summary = weekly_data.sum(numeric_only=True)
             cols = st.columns(len(metric_labels))
             for i, (metric, label) in enumerate(metric_labels.items()):
-                cols[i].metric(label=label, value=f"{int(weekly_summary.get(metric, 0))}", border= True)
+                with cols[i]:
+                    fig = go.Figure(go.Indicator(
+                        mode="gauge+number",
+                        value=weekly_summary.get(metric, 0),
+                        title={'text': label}
+                    ))
+                    fig.update_layout(height=250, margin=dict(l=20, r=20, t=50, b=20))
+                    st.plotly_chart(fig, use_container_width=True)
 
         st.divider()
-
-    # --- NUEVA SECCIÓN: GRÁFICOS DE ACUMULADO KPI ---
         st.header("KPIs Acumulados por Semana")
         df_filtered['Week_Start'] = df_filtered['Fecha'].apply(get_thursday_week_range)
         weekly_kpis = df_filtered.groupby('Week_Start').sum(numeric_only=True).sort_index()
-    
+        
         if weekly_kpis.empty:
             st.warning("No hay suficientes datos históricos para mostrar KPIs acumulados.")
         else:
             cumulative_kpis = weekly_kpis.cumsum()
-        
-        # Ahora esta línea funcionará siempre
             kpi_cols = st.columns(len(metric_labels))
             for i, (metric, label) in enumerate(metric_labels.items()):
                 with kpi_cols[i]:
                     fig = go.Figure()
-                    fig.add_trace(go.Scatter(
-                        x=cumulative_kpis.index, 
-                        y=cumulative_kpis[metric], 
-                        fill='tozeroy', 
-                        mode='lines',
-                        name=label
+                    fig.add_trace(go.Scatter(x=cumulative_kpis.index, y=cumulative_kpis[metric], fill='tozeroy', mode='lines', name=label))
+                    fig.update_layout(title=f"Acumulado de {label}", height=300, margin=dict(l=20, r=20, t=40, b=20), xaxis_title=None, yaxis_title="Total")
+                    st.plotly_chart(fig, use_container_width=True)
+
+    # --- PESTAÑA MENSUAL ---
+    with tab_monthly:
+        st.header("Análisis Mensual")
+        # Crear selector de mes y año
+        df_filtered['MesAño'] = df_filtered['Fecha'].dt.strftime('%Y-%m')
+        available_months = sorted(df_filtered['MesAño'].unique(), reverse=True)
+        selected_month = st.selectbox("Selecciona un mes", options=available_months, key="monthly_selector")
+
+        monthly_data = df_filtered[df_filtered['MesAño'] == selected_month]
+        
+        if monthly_data.empty:
+            st.warning("No hay datos para el reclutador y el mes seleccionados.")
+        else:
+            monthly_summary = monthly_data.sum(numeric_only=True)
+            cols = st.columns(len(metric_labels))
+            for i, (metric, label) in enumerate(metric_labels.items()):
+                with cols[i]:
+                    fig = go.Figure(go.Indicator(
+                        mode="gauge+number",
+                        value=monthly_summary.get(metric, 0),
+                        title={'text': label}
                     ))
-                    fig.update_layout(
-                        title=f"Acumulado de {label}",
-                        height=300,
-                        margin=dict(l=20, r=20, t=40, b=20),
-                        xaxis_title=None,
-                        yaxis_title="Total"
-                    )
+                    fig.update_layout(height=250, margin=dict(l=20, r=20, t=50, b=20))
                     st.plotly_chart(fig, use_container_width=True)
 
         st.divider()
+        st.header("KPIs Acumulados por Mes")
+        monthly_kpis = df_filtered.groupby('MesAño').sum(numeric_only=True).sort_index()
+        
+        if monthly_kpis.empty:
+            st.warning("No hay suficientes datos históricos para mostrar KPIs acumulados.")
+        else:
+            cumulative_kpis_monthly = monthly_kpis.cumsum()
+            kpi_cols = st.columns(len(metric_labels))
+            for i, (metric, label) in enumerate(metric_labels.items()):
+                with kpi_cols[i]:
+                    fig = go.Figure()
+                    fig.add_trace(go.Scatter(x=cumulative_kpis_monthly.index, y=cumulative_kpis_monthly[metric], fill='tozeroy', mode='lines', name=label))
+                    fig.update_layout(title=f"Acumulado de {label}", height=300, margin=dict(l=20, r=20, t=40, b=20), xaxis_title=None, yaxis_title="Total")
+                    st.plotly_chart(fig, use_container_width=True)
 
-    # --- SECCIÓN ACTUALIZADA: PUBLICACIONES DEL DOMINGO ---
+    # --- PESTAÑA DE DOMINGOS ---
+    with tab_sunday:
         st.header("Análisis de Publicaciones en Domingo")
-    
-        sunday_df = df[df['Fecha'].dt.weekday == 6].copy() # 6 es Domingo
-    
+        sunday_df = df[df['Fecha'].dt.weekday == 6].copy()
+        
         if sunday_df.empty:
             st.warning("No se han registrado publicaciones en ningún domingo.")
         else:
             sunday_df.sort_values('Fecha', ascending=False, inplace=True)
             available_sundays = sunday_df['Fecha'].dt.date.unique()
-        
+            
             selected_sunday = st.selectbox(
                 "Selecciona un domingo para ver el detalle:",
                 options=available_sundays,
                 format_func=lambda date: date.strftime('%d de %B, %Y')
             )
-        
+            
             col1, col2 = st.columns([1, 2])
-
             with col1:
-            # INDICADOR GRANDE
                 total_pubs_sunday = sunday_df[sunday_df['Fecha'].dt.date == selected_sunday]['Publicaciones'].sum()
-                st.metric(
-                label=f"Total de Publicaciones del Domingo {selected_sunday.strftime('%d/%m/%Y')}",
-                value=int(total_pubs_sunday)
-                )
+                st.metric(label=f"Total de Publicaciones del Domingo {selected_sunday.strftime('%d/%m/%Y')}", value=int(total_pubs_sunday))
 
             with col2:
-            # GRÁFICO DE LÍNEAS HISTÓRICO
                 historical_sunday_pubs = sunday_df.groupby(sunday_df['Fecha'].dt.date)['Publicaciones'].sum().sort_index()
                 fig_line = go.Figure()
-                fig_line.add_trace(go.Scatter(
-                    x=historical_sunday_pubs.index,
-                    y=historical_sunday_pubs.values,
-                    mode='lines+markers',
-                    name='Publicaciones'
-                ))
-                fig_line.update_layout(
-                    title="Tendencia de Publicaciones en Domingos",
-                    xaxis_title="Fecha",
-                    yaxis_title="Número de Publicaciones",
-                    height=350
-                )
+                fig_line.add_trace(go.Scatter(x=historical_sunday_pubs.index, y=historical_sunday_pubs.values, mode='lines+markers', name='Publicaciones'))
+                fig_line.update_layout(title="Tendencia de Publicaciones en Domingos", xaxis_title="Fecha", yaxis_title="Número de Publicaciones", height=350)
                 st.plotly_chart(fig_line, use_container_width=True)
-            
-        # --- NUEVA SECCIÓN: DESGLOSE POR RECLUTADOR ---
+                
             st.divider()
             st.subheader(f"Desglose por Reclutador - {selected_sunday.strftime('%d/%m/%Y')}")
-
-        # Filtrar datos para el domingo seleccionado y que tengan publicaciones
-            sunday_detail_df = sunday_df[
-                (sunday_df['Fecha'].dt.date == selected_sunday) &
-                (sunday_df['Publicaciones'] > 0)
-            ][['Reclutador', 'Publicaciones']]
+            sunday_detail_df = sunday_df[(sunday_df['Fecha'].dt.date == selected_sunday) & (sunday_df['Publicaciones'] > 0)][['Reclutador', 'Publicaciones']]
 
             if sunday_detail_df.empty:
                 st.info("Ningún reclutador realizó publicaciones en el domingo seleccionado.")
             else:
                 num_recruiters_posted = len(sunday_detail_df)
-            # Usar hasta 5 columnas para que no se vea muy apretado
                 cols = st.columns(min(num_recruiters_posted, 5)) 
-            
                 for i, row in enumerate(sunday_detail_df.itertuples()):
-                # El operador % (módulo) asegura que si hay más de 5 reclutadores,
-                # se reutilicen las columnas, creando una nueva fila visual.
                     with cols[i % 5]:
                         st.metric(label=row.Reclutador, value=int(row.Publicaciones))
-    
-    
-    
-    with tabs3:
-        st.header("Metricas del mes")
-
-        
-        col1, col2, col3= st.columns([1, 1, 1])
-        col4, col5 = st.columns([2,2])
-
-        #Primer columna para el gauge jeje equis de
-    with col1:
-        fig = go.Figure(go.Indicator(
-        mode = "gauge+number",
-        value = df_filtered['Publicaciones'].sum(),
-        title = {'text': "Publicaciones"}))
-        st.plotly_chart(fig, use_container_width=True)
-        
-    with col2:
-        fig = go.Figure(go.Indicator(
-        mode = "gauge+number",
-        value = df_filtered['Contactos'].sum(),
-        title = {'text': "Contactados"}))
-        st.plotly_chart(fig, use_container_width=True)
-
-    with col3:
-        fig = go.Figure(go.Indicator(
-        mode = "gauge+number",
-        value = df_filtered['Citas'].sum(),
-        title = {'text': "Citados"}))
-        st.plotly_chart(fig, use_container_width=True)
-
-    with col4:
-        fig4 = go.Figure(go.Indicator(
-        mode = "gauge+number",
-        value = df_filtered['Entrevistas'].sum(),
-        title = {'text': "Acudieron a la cita"}))
-        st.plotly_chart(fig4, use_container_width=True)
-
-    with col5:
-        fig5 = go.Figure(go.Indicator(
-        mode = "gauge+number",
-        value = df_filtered['Aceptados'].sum(),
-        title = {'text': "Aceptados"}))
-        st.plotly_chart(fig5, use_container_width=True)
-
-    
-
-    
-    st.divider()
-    
 else:
-        st.error("No se pudieron cargar los datos. Revisa la conexión y la configuración.")
-    
-##Estoy muriendoooo
-
+    st.error("No se pudieron cargar los datos. Revisa la conexión y la configuración.")
 
 
 
