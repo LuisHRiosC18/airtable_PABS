@@ -57,7 +57,7 @@ if not df.empty:
     }
 
     # --- CREACIÓN DE PESTAÑAS ---
-    tab_daily, tab_weekly, tab_monthly, tab_sunday = st.tabs(["Diario ☝️🤓", "Semanal ☝️🤓", "Mensual ☝️🤓", "Análisis de Domingos ☝️🤓"])
+    tab_daily, tab_weekly, tab_monthly, tab_sunday = st.tabs(["Diario ", "Semanal", "Mensual", "Análisis de Domingos"])
 
     # --- PESTAÑA DIARIA ---
     with tab_daily:
@@ -79,7 +79,8 @@ if not df.empty:
                         title={'text': label}
                     ))
                     fig.update_layout(height=250, margin=dict(l=20, r=20, t=50, b=20))
-                    st.plotly_chart(fig, use_container_width=True)
+                    # FIX: Añadir clave única
+                    st.plotly_chart(fig, use_container_width=True, key=f"daily_gauge_{metric}")
 
     # --- PESTAÑA SEMANAL ---
     with tab_weekly:
@@ -104,7 +105,8 @@ if not df.empty:
                         title={'text': label}
                     ))
                     fig.update_layout(height=250, margin=dict(l=20, r=20, t=50, b=20))
-                    st.plotly_chart(fig, use_container_width=True)
+                    # FIX: Añadir clave única
+                    st.plotly_chart(fig, use_container_width=True, key=f"weekly_gauge_{metric}")
 
         st.divider()
         st.header("KPIs Acumulados por Semana")
@@ -121,7 +123,8 @@ if not df.empty:
                     fig = go.Figure()
                     fig.add_trace(go.Scatter(x=cumulative_kpis.index, y=cumulative_kpis[metric], fill='tozeroy', mode='lines', name=label))
                     fig.update_layout(title=f"Acumulado de {label}", height=300, margin=dict(l=20, r=20, t=40, b=20), xaxis_title=None, yaxis_title="Total")
-                    st.plotly_chart(fig, use_container_width=True)
+                    # FIX: Añadir clave única
+                    st.plotly_chart(fig, use_container_width=True, key=f"weekly_kpi_{metric}")
 
     # --- PESTAÑA MENSUAL ---
     with tab_monthly:
@@ -146,7 +149,8 @@ if not df.empty:
                         title={'text': label}
                     ))
                     fig.update_layout(height=250, margin=dict(l=20, r=20, t=50, b=20))
-                    st.plotly_chart(fig, use_container_width=True)
+                    # FIX: Añadir clave única
+                    st.plotly_chart(fig, use_container_width=True, key=f"monthly_gauge_{metric}")
 
         st.divider()
         st.header("KPIs Acumulados por Mes")
@@ -162,7 +166,8 @@ if not df.empty:
                     fig = go.Figure()
                     fig.add_trace(go.Scatter(x=cumulative_kpis_monthly.index, y=cumulative_kpis_monthly[metric], fill='tozeroy', mode='lines', name=label))
                     fig.update_layout(title=f"Acumulado de {label}", height=300, margin=dict(l=20, r=20, t=40, b=20), xaxis_title=None, yaxis_title="Total")
-                    st.plotly_chart(fig, use_container_width=True)
+                    # FIX: Añadir clave única
+                    st.plotly_chart(fig, use_container_width=True, key=f"monthly_kpi_{metric}")
 
     # --- PESTAÑA DE DOMINGOS ---
     with tab_sunday:
@@ -207,7 +212,6 @@ if not df.empty:
                         st.metric(label=row.Reclutador, value=int(row.Publicaciones))
 else:
     st.error("No se pudieron cargar los datos. Revisa la conexión y la configuración.")
-
 
 
 
