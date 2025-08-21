@@ -57,12 +57,16 @@ if not df.empty:
     }
 
     # --- CREACIÓN DE PESTAÑAS ---
-    tab_daily, tab_weekly, tab_monthly, tab_sunday = st.tabs(["Diario ", "Semanal", "Mensual", "Análisis de Domingos"])
+    tab_daily, tab_weekly, tab_monthly, tab_sunday = st.tabs(["Diario", "Semanal", "Mensual", "Análisis de Domingos"])
 
-    # --- PESTAÑA DIARIA ---
+    # --- PESTAÑA DIARIA (ACTUALIZADA) ---
     with tab_daily:
         st.header("Métricas del Día")
         selected_date_daily = st.date_input("Selecciona un día", datetime.now().date(), key="daily_date_selector")
+        
+        # Calcular promedios históricos por día de la semana
+        df['DiaSemana'] = df['Fecha'].dt.day_name()
+        daily_avg = df.groupby('DiaSemana')[list(metric_labels.keys())].mean()
         
         daily_data = df_filtered[df_filtered['Fecha'].dt.date == selected_date_daily]
         
@@ -70,17 +74,68 @@ if not df.empty:
             st.warning("No hay datos para el reclutador y el día seleccionados.")
         else:
             daily_summary = daily_data.sum(numeric_only=True)
+            
+            # --- 1. INDICADORES KPI CON COMPARATIVA ---
+            st.subheader("Rendimiento vs Promedio Histórico")
+            day_name = selected_date_daily.strftime('%A')
+            # Mapeo de nombres de día de la semana de español a inglés para lookup
+            day_map_es_en = {
+                'Monday': 'Lunes', 'Tuesday': 'Martes', 'Wednesday': 'Miércoles', 
+                'Thursday': 'Jueves', 'Friday': 'Viernes', 'Saturday': 'Sábado', 'Sunday': 'Domingo'
+            }
+            day_name_en = next((en for en, es in day_map_es_en.items() if es == day_name), day_name)
+
+
             cols = st.columns(len(metric_labels))
             for i, (metric, label) in enumerate(metric_labels.items()):
                 with cols[i]:
-                    fig = go.Figure(go.Indicator(
-                        mode="gauge+number",
-                        value=daily_summary.get(metric, 0),
-                        title={'text': label}
-                    ))
-                    fig.update_layout(height=250, margin=dict(l=20, r=20, t=50, b=20))
-                    # FIX: Añadir clave única
-                    st.plotly_chart(fig, use_container_width=True, key=f"daily_gauge_{metric}")
+                    value = daily_summary.get(metric, 0)
+                    avg_value = daily_avg.loc[day_name_en, metric] if day_name_en in daily_avg.index else 0
+                    delta = f"{(value - avg_value):.1f}" if avg_value > 0 else None
+                    st.metric(
+                        label=label, 
+                        value=f"{int(value)}",
+                        delta=delta,
+                        help=f"El promedio histórico para los {day_name} es {avg_value:.1f}"
+                    )
+            
+            st.divider()
+
+            # --- 2. RANKING DE RECLUTADORES DEL DÍA ---
+            st.subheader("Ranking de Reclutadores del Día")
+            metric_to_rank = st.selectbox("Selecciona una métrica para el ranking:", options=list(metric_labels.keys()), format_func=lambda x: metric_labels[x])
+            
+            ranking_data = daily_data.groupby('Reclutador')[metric_to_rank].sum().sort_values(ascending=False).reset_index()
+            ranking_data = ranking_data[ranking_data[metric_to_rank] > 0]
+
+            if ranking_data.empty:
+                st.info(f"Nadie registró actividad para '{metric_labels[metric_to_rank]}' en este día.")
+            else:
+                fig_rank = go.Figure(go.Bar(
+                    x=ranking_data['Reclutador'],
+                    y=ranking_data[metric_to_rank],
+                    text=ranking_data[metric_to_rank],
+                    textposition='auto'
+                ))
+                fig_rank.update_layout(
+                    title=f"Top Reclutadores por {metric_labels[metric_to_rank]}",
+                    xaxis_title="Reclutador",
+                    yaxis_title="Total"
+                )
+                st.plotly_chart(fig_rank, use_container_width=True)
+
+            st.divider()
+
+            # --- 3. TABLA DE RESUMEN DETALLADO ---
+            st.subheader("Tabla de Resumen del Día")
+            summary_table = daily_data.groupby('Reclutador')[list(metric_labels.keys())].sum()
+            # Filtrar reclutadores sin actividad
+            summary_table = summary_table[summary_table.sum(axis=1) > 0]
+            if summary_table.empty:
+                 st.info("No hay actividad registrada en la tabla de resumen.")
+            else:
+                st.dataframe(summary_table, use_container_width=True)
+
 
     # --- PESTAÑA SEMANAL ---
     with tab_weekly:
@@ -105,7 +160,6 @@ if not df.empty:
                         title={'text': label}
                     ))
                     fig.update_layout(height=250, margin=dict(l=20, r=20, t=50, b=20))
-                    # FIX: Añadir clave única
                     st.plotly_chart(fig, use_container_width=True, key=f"weekly_gauge_{metric}")
 
         st.divider()
@@ -123,13 +177,11 @@ if not df.empty:
                     fig = go.Figure()
                     fig.add_trace(go.Scatter(x=cumulative_kpis.index, y=cumulative_kpis[metric], fill='tozeroy', mode='lines', name=label))
                     fig.update_layout(title=f"Acumulado de {label}", height=300, margin=dict(l=20, r=20, t=40, b=20), xaxis_title=None, yaxis_title="Total")
-                    # FIX: Añadir clave única
                     st.plotly_chart(fig, use_container_width=True, key=f"weekly_kpi_{metric}")
 
     # --- PESTAÑA MENSUAL ---
     with tab_monthly:
         st.header("Análisis Mensual")
-        # Crear selector de mes y año
         df_filtered['MesAño'] = df_filtered['Fecha'].dt.strftime('%Y-%m')
         available_months = sorted(df_filtered['MesAño'].unique(), reverse=True)
         selected_month = st.selectbox("Selecciona un mes", options=available_months, key="monthly_selector")
@@ -149,7 +201,6 @@ if not df.empty:
                         title={'text': label}
                     ))
                     fig.update_layout(height=250, margin=dict(l=20, r=20, t=50, b=20))
-                    # FIX: Añadir clave única
                     st.plotly_chart(fig, use_container_width=True, key=f"monthly_gauge_{metric}")
 
         st.divider()
@@ -166,7 +217,6 @@ if not df.empty:
                     fig = go.Figure()
                     fig.add_trace(go.Scatter(x=cumulative_kpis_monthly.index, y=cumulative_kpis_monthly[metric], fill='tozeroy', mode='lines', name=label))
                     fig.update_layout(title=f"Acumulado de {label}", height=300, margin=dict(l=20, r=20, t=40, b=20), xaxis_title=None, yaxis_title="Total")
-                    # FIX: Añadir clave única
                     st.plotly_chart(fig, use_container_width=True, key=f"monthly_kpi_{metric}")
 
     # --- PESTAÑA DE DOMINGOS ---
@@ -212,8 +262,6 @@ if not df.empty:
                         st.metric(label=row.Reclutador, value=int(row.Publicaciones))
 else:
     st.error("No se pudieron cargar los datos. Revisa la conexión y la configuración.")
-
-
 
 
 
