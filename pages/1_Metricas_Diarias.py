@@ -83,7 +83,9 @@ if not df.empty:
                 'Monday': 'Lunes', 'Tuesday': 'Martes', 'Wednesday': 'Miércoles', 
                 'Thursday': 'Jueves', 'Friday': 'Viernes', 'Saturday': 'Sábado', 'Sunday': 'Domingo'
             }
-            day_name_en = next((en for en, es in day_map_es_en.items() if es == day_name), day_name)
+            # strftime('%A') puede devolver nombres en el locale del sistema (español)
+            # Hacemos una búsqueda para encontrar la clave en inglés
+            day_name_en = next((en for en, es in day_map_es_en.items() if es.lower() == day_name.lower()), day_name)
 
 
             cols = st.columns(len(metric_labels))
@@ -101,9 +103,24 @@ if not df.empty:
             
             st.divider()
 
+            # --- GRÁFICOS DE MEDIDOR (GAUGE) REINTEGRADOS ---
+            st.subheader("Medidores de Volumen Diario")
+            cols_gauge = st.columns(len(metric_labels))
+            for i, (metric, label) in enumerate(metric_labels.items()):
+                with cols_gauge[i]:
+                    fig_gauge = go.Figure(go.Indicator(
+                        mode="gauge+number",
+                        value=daily_summary.get(metric, 0),
+                        title={'text': label}
+                    ))
+                    fig_gauge.update_layout(height=250, margin=dict(l=20, r=20, t=50, b=20))
+                    st.plotly_chart(fig_gauge, use_container_width=True, key=f"daily_gauge_reinstated_{metric}")
+
+            st.divider()
+
             # --- 2. RANKING DE RECLUTADORES DEL DÍA ---
             st.subheader("Ranking de Reclutadores del Día")
-            metric_to_rank = st.selectbox("Selecciona una métrica para el ranking:", options=list(metric_labels.keys()), format_func=lambda x: metric_labels[x])
+            metric_to_rank = st.selectbox("Selecciona una métrica para el ranking:", options=list(metric_labels.keys()), format_func=lambda x: metric_labels[x], key="ranking_selector")
             
             ranking_data = daily_data.groupby('Reclutador')[metric_to_rank].sum().sort_values(ascending=False).reset_index()
             ranking_data = ranking_data[ranking_data[metric_to_rank] > 0]
@@ -262,8 +279,6 @@ if not df.empty:
                         st.metric(label=row.Reclutador, value=int(row.Publicaciones))
 else:
     st.error("No se pudieron cargar los datos. Revisa la conexión y la configuración.")
-
-
 
 
 
