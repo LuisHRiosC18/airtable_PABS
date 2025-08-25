@@ -127,7 +127,7 @@ if not df.empty:
         
         for i, (team_name, team_data) in enumerate(TEAMS_CONFIG.items()):
             with cols[i]:
-                st.subheader(f"Equipo {team_name}")
+                st.subheader(f"{team_name}")
                 team_df = comparison_df[comparison_df['Reclutador'].isin(team_data['members'])]
                 member_summary = team_df.groupby('Reclutador')[metric_to_compare].sum().reset_index()
                 
